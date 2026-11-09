@@ -73,11 +73,15 @@
   .chips button[aria-pressed="true"]{border-color:var(--blue);background:var(--blue);color:#fff}
   .chips button[aria-pressed="true"] small{color:#dbe7ff}
   .slots-scroll{overflow-x:auto;padding-bottom:4px}
-  .slots{display:grid;gap:6px;min-width:420px}
-  .slots .lbl{font-weight:600;font-size:.88rem;align-self:center}
-  .slots .hd{font-size:.8rem;color:var(--muted);text-align:center}
-  .slots button{font:inherit;font-size:.82rem;cursor:pointer;background:#fff;border:2px solid var(--line);border-radius:10px;padding:8px 0;transition:.12s}
-  .slots button:hover{border-color:var(--blue)}
+  .slots{display:grid;gap:5px;min-width:400px}
+  .slots .lbl{font-size:.8rem;color:var(--muted);align-self:center;text-align:right;padding-right:4px}
+  .slots .hd{font-weight:600;font-size:.88rem;text-align:center}
+  .slots button{font:inherit;font-size:.82rem;cursor:pointer;background:#fff;border:2px solid var(--line);border-radius:10px;padding:6px 0;transition:.12s}
+  .slots button:hover:not(:disabled){border-color:var(--blue)}
+  .slots button:disabled{background:#4b5563;border-color:#4b5563;cursor:not-allowed}
+  .legend{font-size:.8rem;color:var(--muted);margin-top:10px}
+  .sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin:0 4px 0 8px;border:2px solid var(--line)}
+  .sw.off{background:#4b5563;border-color:#4b5563}
   .slots button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
   .preview{background:var(--blue-soft);border-radius:14px;padding:14px 16px;font-size:.95rem;margin-bottom:16px;color:var(--ink)}
   #send{width:100%;justify-content:center}
@@ -200,8 +204,15 @@
           <button type="button" data-v="6 meses"><b>6 meses</b><small>preparação completa</small></button>
         </div>
 
-        <h3>3. Horários de preferência <small>(pode marcar vários)</small></h3>
+        <h3>3. Duração da aula</h3>
+        <div class="chips" id="dur">
+          <button type="button" data-v="1h"><b>1h</b><small>aula objetiva</small></button>
+          <button type="button" data-v="1h30"><b>1h30</b><small>mais tempo por tema</small></button>
+        </div>
+
+        <h3>4. Horários de início <small>(pode marcar vários)</small></h3>
         <div class="slots-scroll"><div class="slots" id="slots"></div></div>
+        <p class="legend"><span class="sw on"></span> disponível <span class="sw off"></span> indisponível</p>
 
         <h3>Sua mensagem</h3>
         <div class="preview" id="preview">Escolha uma modalidade para começar.</div>
@@ -274,30 +285,36 @@
   // Código do país (55) + DDD + número, só dígitos. Ex.: 5511999999999
   const WHATSAPP = "5500000000000";
   const MENSAGEM = "Olá, Rafa! Vi seu site e quero saber mais sobre as aulas.";
-  // Dias e horários que você oferece (ajuste à vontade):
-  const DIAS = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
-  const HORARIOS = ["8h", "10h", "14h", "16h", "19h", "21h"];
+  // Disponibilidade por dia: [início, fim] em horas (24h). Dia sem intervalos = indisponível.
+  const DIAS = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
+  const DISPONIBILIDADE = {
+    "Segunda": [], "Terça": [], "Quarta": [[20, 23]], "Quinta": [],
+    "Sexta": [[16, 23]], "Sábado": [[8, 23]], "Domingo": [[8, 23]]
+  };
+  const PRIMEIRA_HORA = 8, ULTIMA_HORA = 22;   // linhas exibidas na grade
   // ======================
 
   const wa = text => "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(text);
   document.querySelectorAll(".js-wa").forEach(a => { a.href = wa(MENSAGEM); a.target = "_blank"; a.rel = "noopener"; });
   document.getElementById("ano").textContent = new Date().getFullYear();
 
-  const state = { mod: null, pkg: null, slots: new Set() };
+  const state = { mod: null, pkg: null, dur: "1h", slots: new Set() };
+  const DUR_MIN = { "1h": 60, "1h30": 90 };
   const $ = id => document.getElementById(id);
 
-  // grade de horários
+  // grade: dias na horizontal, horários na vertical
   const grid = $("slots");
-  grid.style.gridTemplateColumns = "56px repeat(" + HORARIOS.length + ", 1fr)";
+  grid.style.gridTemplateColumns = "40px repeat(" + DIAS.length + ", 1fr)";
   grid.appendChild(document.createElement("span"));
-  HORARIOS.forEach(h => { const e = document.createElement("span"); e.className = "hd"; e.textContent = h; grid.appendChild(e); });
-  DIAS.forEach(d => {
-    const l = document.createElement("span"); l.className = "lbl"; l.textContent = d.slice(0, 3); l.title = d; grid.appendChild(l);
-    HORARIOS.forEach(h => {
+  DIAS.forEach(d => { const e = document.createElement("span"); e.className = "hd"; e.textContent = d.slice(0, 3); e.title = d; grid.appendChild(e); });
+  const cells = [];
+  for (let h = PRIMEIRA_HORA; h <= ULTIMA_HORA; h++) {
+    const l = document.createElement("span"); l.className = "lbl"; l.textContent = h + "h"; grid.appendChild(l);
+    DIAS.forEach((d, di) => {
       const b = document.createElement("button");
-      b.type = "button"; b.textContent = "✓"; b.dataset.key = d + " às " + h;
-      b.setAttribute("aria-pressed", "false"); b.setAttribute("aria-label", d + " às " + h);
-      b.style.color = "transparent";
+      b.type = "button"; b.textContent = "✓"; b.style.color = "transparent";
+      b.dataset.key = d + " às " + h + "h"; b.dataset.day = d; b.dataset.di = di; b.dataset.hour = h;
+      b.setAttribute("aria-pressed", "false"); b.setAttribute("aria-label", d + " às " + h + "h");
       b.onclick = () => {
         const on = b.getAttribute("aria-pressed") !== "true";
         b.setAttribute("aria-pressed", on);
@@ -305,15 +322,26 @@
         if (on) state.slots.add(b.dataset.key); else state.slots.delete(b.dataset.key);
         render();
       };
-      grid.appendChild(b);
+      grid.appendChild(b); cells.push(b);
     });
-  });
+  }
+  // habilita só o que cabe na disponibilidade, considerando a duração escolhida
+  function refreshAvailability() {
+    cells.forEach(b => {
+      const h = +b.dataset.hour, fim = h + DUR_MIN[state.dur] / 60;
+      const ok = DISPONIBILIDADE[b.dataset.day].some(([ini, f]) => h >= ini && fim <= f);
+      b.disabled = !ok;
+      if (!ok && b.getAttribute("aria-pressed") === "true") {
+        b.setAttribute("aria-pressed", "false"); b.style.color = "transparent"; state.slots.delete(b.dataset.key);
+      }
+    });
+  }
 
   function setChip(groupId, key, value) {
     state[key] = value;
     document.querySelectorAll("#" + groupId + " button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === value));
   }
-  [["mod", "mod"], ["pkg", "pkg"]].forEach(([id, key]) => {
+  [["mod", "mod"], ["pkg", "pkg"], ["dur", "dur"]].forEach(([id, key]) => {
     document.querySelectorAll("#" + id + " button").forEach(b => {
       b.setAttribute("aria-pressed", "false");
       b.onclick = () => { setChip(id, key, b.dataset.v); render(); };
@@ -322,13 +350,18 @@
   document.querySelectorAll(".pick").forEach(a => a.addEventListener("click", () => { setChip("mod", "mod", a.dataset.mod); render(); }));
 
   function buildMessage() {
-    const slots = [...grid.querySelectorAll("button")].map(b => b.dataset.key).filter(k => state.slots.has(k));
-    let m = "Oi! Estou interessado em aulas para " + state.mod;
-    if (state.pkg) m += " (pacote de " + state.pkg + ")";
+    const slots = cells.filter(b => state.slots.has(b.dataset.key))
+      .sort((x, y) => (+x.dataset.di - +y.dataset.di) || (+x.dataset.hour - +y.dataset.hour))
+      .map(b => b.dataset.key);
+    const det = [];
+    if (state.pkg) det.push("pacote de " + state.pkg);
+    det.push("aulas de " + state.dur);
+    let m = "Oi! Estou interessado em aulas para " + state.mod + " (" + det.join(", ") + ")";
     m += slots.length ? " nos dias: " + slots.join(", ") + "." : ". Gostaria de combinar os horários.";
     return m;
   }
   function render() {
+    refreshAvailability();
     const send = $("send");
     if (!state.mod) {
       $("preview").textContent = "Escolha uma modalidade para começar.";
@@ -343,6 +376,7 @@
   const q = new URLSearchParams(location.search).get("modalidade");
   const map = { "pre-vestibular": "Pré-vestibular", "vestibular": "Pré-vestibular", "graduacao": "Graduação", "ensino-medio": "Ensino Médio" };
   if (q && map[q.toLowerCase()]) setChip("mod", "mod", map[q.toLowerCase()]);
+  setChip("dur", "dur", state.dur);
   render();
 </script>
 </body>
