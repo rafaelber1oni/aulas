@@ -34,16 +34,14 @@
 
   /* hero */
   .hero{background:linear-gradient(180deg,var(--blue-soft),#fff);overflow:hidden}
-  .hero .wrap{display:grid;gap:12px;grid-template-columns:1.1fr .9fr;align-items:end;min-height:460px}
-  .hero-text{padding:48px 0;align-self:center}
+  .hero .wrap{text-align:center}
+  .hero-text{padding:64px 0 56px;max-width:720px;margin:0 auto}
   .tag{display:inline-block;background:var(--blue);color:#fff;font-weight:600;font-size:.85rem;padding:6px 14px;border-radius:8px;margin-bottom:16px}
   .hero h1{font-size:clamp(2.4rem,7vw,4rem);font-weight:800}
   .hero h2{font-size:clamp(1.1rem,3vw,1.5rem);font-weight:500;color:var(--blue);margin:10px 0 6px}
   .handle{color:var(--muted);font-weight:600;margin-bottom:22px}
   .handle a{color:var(--blue);text-decoration:none}
-  .hero-photo{display:flex;justify-content:center;align-self:end}
-  .hero-photo img{width:100%;max-width:380px;display:block;mix-blend-mode:multiply}
-  .ctas{display:flex;gap:12px;flex-wrap:wrap}
+  .ctas{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
 
   /* faixa de credenciais */
   .proof{background:var(--blue);color:#fff;padding:26px 0}
@@ -63,6 +61,28 @@
   .card .ico{font-size:2rem;margin-bottom:8px}
 
   /* trajetória */
+  /* agendamento */
+  .book{max-width:720px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:22px;padding:28px;box-shadow:0 4px 18px rgba(11,77,179,.08)}
+  .book h3{font-size:1.02rem;margin:22px 0 10px}
+  .book h3:first-child{margin-top:0}
+  .book h3 small{font-weight:400;color:var(--muted)}
+  .chips{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+  .chips button{font:inherit;cursor:pointer;background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 10px;text-align:center;color:var(--ink);transition:.12s;display:flex;flex-direction:column;gap:2px;align-items:center}
+  .chips button small{color:var(--muted);font-size:.78rem}
+  .chips button:hover{border-color:var(--blue)}
+  .chips button[aria-pressed="true"]{border-color:var(--blue);background:var(--blue);color:#fff}
+  .chips button[aria-pressed="true"] small{color:#dbe7ff}
+  .slots-scroll{overflow-x:auto;padding-bottom:4px}
+  .slots{display:grid;gap:6px;min-width:420px}
+  .slots .lbl{font-weight:600;font-size:.88rem;align-self:center}
+  .slots .hd{font-size:.8rem;color:var(--muted);text-align:center}
+  .slots button{font:inherit;font-size:.82rem;cursor:pointer;background:#fff;border:2px solid var(--line);border-radius:10px;padding:8px 0;transition:.12s}
+  .slots button:hover{border-color:var(--blue)}
+  .slots button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+  .preview{background:var(--blue-soft);border-radius:14px;padding:14px 16px;font-size:.95rem;margin-bottom:16px;color:var(--ink)}
+  #send{width:100%;justify-content:center}
+  #send[aria-disabled="true"]{background:#aab6c9;pointer-events:none}
+  .pick{margin-top:14px}
   .alt{background:#f6f9ff}
   .timeline{max-width:640px;margin:0 auto;border-left:3px solid var(--blue);padding-left:24px}
   .tl{position:relative;margin-bottom:22px}
@@ -95,10 +115,7 @@
   .float:hover{background:var(--wa-dark)}
 
   @media(max-width:700px){
-    .hero .wrap{grid-template-columns:1fr;min-height:0;gap:0}
-    .hero-text{padding:34px 0 8px;text-align:center}
-    .ctas{justify-content:center}
-    .hero-photo img{max-width:300px}
+    .hero-text{padding:40px 0 36px}
     .story{grid-template-columns:1fr}
     .story img{max-width:320px;margin:0 auto}
   }
@@ -109,7 +126,7 @@
 <div class="topbar">
   <div class="wrap">
     <div class="brand">Rafa Berioni</div>
-    <a class="btn small js-wa" href="#">Agendar aula</a>
+    <a class="btn small" href="#agendar">Agendar aula</a>
   </div>
 </div>
 
@@ -121,12 +138,9 @@
       <h2>economia, matemática &amp; humanas</h2>
       <p class="handle"><a href="https://instagram.com/economiacomberioni" target="_blank" rel="noopener">@economiacomberioni</a></p>
       <div class="ctas">
-        <a class="btn js-wa" href="#">💬 Agendar pelo WhatsApp</a>
-        <a class="btn ghost" href="#foco">Ver as aulas</a>
+        <a class="btn" href="#agendar">📅 Agendar minha aula</a>
+        <a class="btn ghost" href="#foco">Ver modalidades</a>
       </div>
-    </div>
-    <div class="hero-photo">
-      <img src="img/rafa1.jpg" alt="Rafa Berioni, professor de Economia, Matemática e Humanas" width="380" height="464">
     </div>
   </div>
 </header>
@@ -147,19 +161,51 @@
       <div class="grid">
         <div class="card">
           <div class="ico">🎯</div>
-          <h3>Vestibulandos</h3>
+          <h3>Pré-vestibular</h3>
           <p>Treinamento estratégico para provas discursivas (Fuvest e Unicamp), gestão de tempo e redação matemática.</p>
+          <a class="btn small pick" href="#agendar" data-mod="Pré-vestibular">Quero esta</a>
         </div>
         <div class="card">
           <div class="ico">📈</div>
-          <h3>Universitários</h3>
+          <h3>Graduação</h3>
           <p>Socorro de fim de semestre para Economia: Cálculo, Econometria, Macro e História Econômica.</p>
+          <a class="btn small pick" href="#agendar" data-mod="Graduação">Quero esta</a>
         </div>
         <div class="card">
           <div class="ico">📚</div>
           <h3>Ensino Médio</h3>
           <p>Reforço contínuo e construção de base lógica em Matemática, História e Geografia.</p>
+          <a class="btn small pick" href="#agendar" data-mod="Ensino Médio">Quero esta</a>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="agendar" class="alt">
+    <div class="wrap">
+      <h2 class="title">Monte sua aula</h2>
+      <p class="sub">Escolha a modalidade, o pacote e os horários. Ao clicar no botão, a mensagem já chega pronta no meu WhatsApp.</p>
+      <div class="book">
+        <h3>1. Modalidade</h3>
+        <div class="chips" id="mod">
+          <button type="button" data-v="Pré-vestibular">🎯 Pré-vestibular</button>
+          <button type="button" data-v="Graduação">📈 Graduação</button>
+          <button type="button" data-v="Ensino Médio">📚 Ensino Médio</button>
+        </div>
+
+        <h3>2. Pacote</h3>
+        <div class="chips" id="pkg">
+          <button type="button" data-v="1 mês"><b>1 mês</b><small>para experimentar</small></button>
+          <button type="button" data-v="3 meses"><b>3 meses</b><small>constância no semestre</small></button>
+          <button type="button" data-v="6 meses"><b>6 meses</b><small>preparação completa</small></button>
+        </div>
+
+        <h3>3. Horários de preferência <small>(pode marcar vários)</small></h3>
+        <div class="slots-scroll"><div class="slots" id="slots"></div></div>
+
+        <h3>Sua mensagem</h3>
+        <div class="preview" id="preview">Escolha uma modalidade para começar.</div>
+        <a class="btn" id="send" href="#" target="_blank" rel="noopener" aria-disabled="true">💬 Enviar pelo WhatsApp</a>
       </div>
     </div>
   </section>
@@ -171,9 +217,8 @@
         <div>
           <h2>Eu não era bom em matemática. <em>Mas foi ela que me fez entrar na USP em 8º lugar.</em></h2>
           <p>Meu problema era que eu <strong>não conseguia decorar as fórmulas</strong>. Quando comecei a aprender o raciocínio matemático, tudo mudou.</p>
-          <p>Para quem é de humanas, a matemática na 2ª fase parece um dragão. O segredo não é decorar: na 2ª fase, você precisa saber <strong>explicar como chegou ao resultado</strong>, e eu posso te ajudar com isso.</p>
           <p><strong>Aulas particulares direcionadas, material exclusivo e zero decoreba.</strong></p>
-          <a class="btn js-wa" href="#" style="margin-top:8px">💬 Vamos domar o dragão?</a>
+          <a class="btn" href="#agendar" style="margin-top:8px">📅 Quero começar</a>
         </div>
       </div>
     </div>
@@ -229,11 +274,76 @@
   // Código do país (55) + DDD + número, só dígitos. Ex.: 5511999999999
   const WHATSAPP = "5500000000000";
   const MENSAGEM = "Olá, Rafa! Vi seu site e quero saber mais sobre as aulas.";
+  // Dias e horários que você oferece (ajuste à vontade):
+  const DIAS = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+  const HORARIOS = ["8h", "10h", "14h", "16h", "19h", "21h"];
   // ======================
 
-  const link = "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(MENSAGEM);
-  document.querySelectorAll(".js-wa").forEach(a => { a.href = link; a.target = "_blank"; a.rel = "noopener"; });
+  const wa = text => "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(text);
+  document.querySelectorAll(".js-wa").forEach(a => { a.href = wa(MENSAGEM); a.target = "_blank"; a.rel = "noopener"; });
   document.getElementById("ano").textContent = new Date().getFullYear();
+
+  const state = { mod: null, pkg: null, slots: new Set() };
+  const $ = id => document.getElementById(id);
+
+  // grade de horários
+  const grid = $("slots");
+  grid.style.gridTemplateColumns = "56px repeat(" + HORARIOS.length + ", 1fr)";
+  grid.appendChild(document.createElement("span"));
+  HORARIOS.forEach(h => { const e = document.createElement("span"); e.className = "hd"; e.textContent = h; grid.appendChild(e); });
+  DIAS.forEach(d => {
+    const l = document.createElement("span"); l.className = "lbl"; l.textContent = d.slice(0, 3); l.title = d; grid.appendChild(l);
+    HORARIOS.forEach(h => {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = "✓"; b.dataset.key = d + " às " + h;
+      b.setAttribute("aria-pressed", "false"); b.setAttribute("aria-label", d + " às " + h);
+      b.style.color = "transparent";
+      b.onclick = () => {
+        const on = b.getAttribute("aria-pressed") !== "true";
+        b.setAttribute("aria-pressed", on);
+        b.style.color = on ? "#fff" : "transparent";
+        if (on) state.slots.add(b.dataset.key); else state.slots.delete(b.dataset.key);
+        render();
+      };
+      grid.appendChild(b);
+    });
+  });
+
+  function setChip(groupId, key, value) {
+    state[key] = value;
+    document.querySelectorAll("#" + groupId + " button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === value));
+  }
+  [["mod", "mod"], ["pkg", "pkg"]].forEach(([id, key]) => {
+    document.querySelectorAll("#" + id + " button").forEach(b => {
+      b.setAttribute("aria-pressed", "false");
+      b.onclick = () => { setChip(id, key, b.dataset.v); render(); };
+    });
+  });
+  document.querySelectorAll(".pick").forEach(a => a.addEventListener("click", () => { setChip("mod", "mod", a.dataset.mod); render(); }));
+
+  function buildMessage() {
+    const slots = [...grid.querySelectorAll("button")].map(b => b.dataset.key).filter(k => state.slots.has(k));
+    let m = "Oi! Estou interessado em aulas para " + state.mod;
+    if (state.pkg) m += " (pacote de " + state.pkg + ")";
+    m += slots.length ? " nos dias: " + slots.join(", ") + "." : ". Gostaria de combinar os horários.";
+    return m;
+  }
+  function render() {
+    const send = $("send");
+    if (!state.mod) {
+      $("preview").textContent = "Escolha uma modalidade para começar.";
+      send.setAttribute("aria-disabled", "true"); send.href = "#"; return;
+    }
+    const m = buildMessage();
+    $("preview").textContent = m;
+    send.setAttribute("aria-disabled", "false"); send.href = wa(m);
+  }
+
+  // link direto: ?modalidade=graduacao
+  const q = new URLSearchParams(location.search).get("modalidade");
+  const map = { "pre-vestibular": "Pré-vestibular", "vestibular": "Pré-vestibular", "graduacao": "Graduação", "ensino-medio": "Ensino Médio" };
+  if (q && map[q.toLowerCase()]) setChip("mod", "mod", map[q.toLowerCase()]);
+  render();
 </script>
 </body>
 </html>
