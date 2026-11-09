@@ -79,6 +79,8 @@
   .slots button{font:inherit;font-size:.82rem;cursor:pointer;background:#fff;border:2px solid var(--line);border-radius:10px;padding:6px 0;transition:.12s}
   .slots button:hover:not(:disabled){border-color:var(--blue)}
   .slots button:disabled{background:#4b5563;border-color:#4b5563;cursor:not-allowed}
+  .slots button.thin{height:4px;min-height:0;padding:0;border:0;background:#e4e8f0;border-radius:2px;align-self:center;font-size:0;opacity:.7}
+  .slots button.res{font-size:.58rem;letter-spacing:.2px;color:#cbd5e1 !important}
   .legend{font-size:.8rem;color:var(--muted);margin-top:10px}
   .sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin:0 4px 0 8px;border:2px solid var(--line)}
   .sw.off{background:#4b5563;border-color:#4b5563}
@@ -212,7 +214,7 @@
 
         <h3>4. Horários de início <small>(pode marcar vários)</small></h3>
         <div class="slots-scroll"><div class="slots" id="slots"></div></div>
-        <p class="legend"><span class="sw on"></span> disponível <span class="sw off"></span> indisponível</p>
+        <p class="legend"><span class="sw on"></span> disponível <span class="sw off"></span> reservado</p>
 
         <h3>Sua mensagem</h3>
         <div class="preview" id="preview">Escolha uma modalidade para começar.</div>
@@ -291,7 +293,7 @@
     "Segunda": [], "Terça": [], "Quarta": [[20, 23]], "Quinta": [],
     "Sexta": [[16, 23]], "Sábado": [[8, 23]], "Domingo": [[8, 23]]
   };
-  const PRIMEIRA_HORA = 8, ULTIMA_HORA = 22;   // linhas exibidas na grade
+  const PRIMEIRA_HORA = 9, ULTIMA_HORA = 22;   // linhas exibidas na grade
   // ======================
 
   const wa = text => "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(text);
@@ -331,6 +333,10 @@
       const h = +b.dataset.hour, fim = h + DUR_MIN[state.dur] / 60;
       const ok = DISPONIBILIDADE[b.dataset.day].some(([ini, f]) => h >= ini && fim <= f);
       b.disabled = !ok;
+      b.classList.toggle("thin", !ok && h <= 17);
+      b.classList.toggle("res", !ok && h >= 19);
+      b.textContent = (!ok && h >= 19) ? "reservado" : "✓";
+      b.style.color = ok && b.getAttribute("aria-pressed") === "true" ? "#fff" : "transparent";
       if (!ok && b.getAttribute("aria-pressed") === "true") {
         b.setAttribute("aria-pressed", "false"); b.style.color = "transparent"; state.slots.delete(b.dataset.key);
       }
@@ -350,14 +356,21 @@
   document.querySelectorAll(".pick").forEach(a => a.addEventListener("click", () => { setChip("mod", "mod", a.dataset.mod); render(); }));
 
   function buildMessage() {
-    const slots = cells.filter(b => state.slots.has(b.dataset.key))
-      .sort((x, y) => (+x.dataset.di - +y.dataset.di) || (+x.dataset.hour - +y.dataset.hour))
-      .map(b => b.dataset.key);
+    const sel = cells.filter(b => state.slots.has(b.dataset.key))
+      .sort((x, y) => (+x.dataset.di - +y.dataset.di) || (+x.dataset.hour - +y.dataset.hour));
+    const porDia = [];
+    sel.forEach(b => {
+      let g = porDia.find(x => x.dia === b.dataset.day);
+      if (!g) { g = { dia: b.dataset.day, horas: [] }; porDia.push(g); }
+      g.horas.push(b.dataset.hour + "h");
+    });
+    const juntar = hs => hs.length < 2 ? hs.join("") : hs.slice(0, -1).join(", ") + " e " + hs[hs.length - 1];
+    const slots = porDia.map(g => g.dia + " às " + juntar(g.horas));
     const det = [];
     if (state.pkg) det.push("pacote de " + state.pkg);
     det.push("aulas de " + state.dur);
     let m = "Oi! Estou interessado em aulas para " + state.mod + " (" + det.join(", ") + ")";
-    m += slots.length ? " nos dias: " + slots.join(", ") + "." : ". Gostaria de combinar os horários.";
+    m += slots.length ? " nos dias: " + slots.join("; ") + "." : ". Gostaria de combinar os horários.";
     return m;
   }
   function render() {
