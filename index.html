@@ -357,10 +357,9 @@
   document.querySelectorAll(".js-wa").forEach(a => { a.href = wa(MENSAGEM); a.target = "_blank"; a.rel = "noopener"; });
   document.getElementById("ano").textContent = new Date().getFullYear();
 
-  // abas (navegação por #hash)
+  // abas: funcionam por clique (mesmo abrindo o arquivo direto) e também por #hash
   const TABS = ["inicio", "aulas", "sobre", "agendar", "contato"];
-  function showTab() {
-    let t = location.hash.slice(1);
+  function showTab(t) {
     if (!TABS.includes(t)) t = "inicio";
     TABS.forEach(n => {
       $("tab-" + n).classList.toggle("active", n === t);
@@ -368,7 +367,16 @@
     });
     window.scrollTo(0, 0);
   }
-  window.addEventListener("hashchange", showTab);
+  document.addEventListener("click", e => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const t = a.getAttribute("href").slice(1);
+    if (!TABS.includes(t)) return;
+    e.preventDefault();
+    showTab(t);
+    try { history.replaceState(null, "", "#" + t); } catch (err) {}
+  });
+  window.addEventListener("hashchange", () => showTab(location.hash.slice(1)));
 
   const state = { mod: null, pkg: null, dur: "1h", slots: new Set() };
   const DUR_MIN = { "1h": 60, "1h30": 90 };
@@ -460,8 +468,7 @@
   if (q && map[q.toLowerCase()]) setChip("mod", "mod", map[q.toLowerCase()]);
   setChip("dur", "dur", state.dur);
   render();
-  if (q && map[q.toLowerCase()] && !location.hash) location.hash = "agendar";
-  showTab();
+  showTab(location.hash.slice(1) || (q && map[q.toLowerCase()] ? "agendar" : "inicio"));
 </script>
 </body>
 </html>
